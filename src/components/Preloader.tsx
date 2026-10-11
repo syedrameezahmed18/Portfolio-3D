@@ -70,10 +70,9 @@ export default function Preloader() {
   return (
     <div
       ref={root}
-      className="fixed inset-0 z-[90] flex flex-col justify-between bg-ink px-6 py-6 md:px-10 md:py-8"
+      className="fixed inset-0 z-[90] flex flex-col justify-end bg-ink px-6 py-6 md:px-10 md:py-8"
       aria-hidden="true"
     >
-      <div className="label">Portfolio · 2026</div>
       <div className="flex items-end justify-between">
         <h1 className="text-[clamp(2rem,6vw,5rem)] leading-[0.95] font-medium">
           {['Syed', 'Rameez', 'Ahmed'].map((w) => (

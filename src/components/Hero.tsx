@@ -42,14 +42,17 @@ export default function Hero() {
       })
         .to('.hero-copy', { yPercent: -18, opacity: 0, ease: 'none' }, 0)
         .to('.hero-meta', { opacity: 0, ease: 'none' }, 0)
-        .to('.hero-canvas', { opacity: 0.2, ease: 'none' }, 0)
+        // Explicit from/to: a plain `to` would initialise lazily, after the
+        // entrance below has set opacity 0, and record that as the top value.
+        .fromTo('.hero-canvas', { opacity: 1 }, { opacity: 0.2, ease: 'none', immediateRender: false }, 0)
 
       if (prefersReducedMotion()) return
 
-      // Entrance waits for the preloader so both never compete.
+      // Entrance waits for the preloader so both never compete. It animates
+      // the inner wrapper so it never shares a property with the scrub above.
       gsap.set('.hero-char', { yPercent: 110 })
       gsap.set('.hero-fade', { opacity: 0, y: 24 })
-      gsap.set('.hero-canvas', { opacity: 0, scale: 0.9 })
+      gsap.set('.hero-canvas-inner', { opacity: 0, scale: 0.9 })
 
       // The callback fires from inside the preloader's timeline, so it must be
       // re-entered through this component's own context or GSAP would resolve
@@ -57,7 +60,7 @@ export default function Hero() {
       const play = contextSafe!(() => {
         gsap
           .timeline({ defaults: { ease: 'expo.out' } })
-          .to('.hero-canvas', { opacity: 1, scale: 1, duration: 1.8 }, 0)
+          .to('.hero-canvas-inner', { opacity: 1, scale: 1, duration: 1.8 }, 0)
           .to('.hero-char', { yPercent: 0, duration: 1.3, stagger: 0.025 }, 0.1)
           .to('.hero-fade', { opacity: 1, y: 0, duration: 1.1, stagger: 0.1 }, 0.7)
       })
@@ -73,16 +76,17 @@ export default function Hero() {
       className="relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pt-28 pb-10 md:px-10 md:pb-12"
     >
       <div className="hero-canvas absolute inset-0 -z-0">
-        <Suspense fallback={null}>
-          <HeroScene simple={compact} />
-        </Suspense>
+        <div className="hero-canvas-inner absolute inset-0">
+          <Suspense fallback={null}>
+            <HeroScene simple={compact} />
+          </Suspense>
+        </div>
         {/* Scrim so the copy reads over the scene: heavy on phones, light on desktop. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%] bg-gradient-to-t from-ink via-ink/90 to-transparent md:hidden" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-1/3 bg-gradient-to-t from-ink to-transparent md:block" />
       </div>
 
-      <div className="hero-meta label relative z-10 mb-auto flex items-center justify-between pb-12">
-        <span>Portfolio · 2026</span>
+      <div className="hero-meta label relative z-10 mb-auto flex items-center justify-end pb-12">
         <span className="hidden sm:inline">Germany</span>
       </div>
 
