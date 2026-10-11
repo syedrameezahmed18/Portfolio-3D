@@ -63,7 +63,7 @@ export default function Hero() {
       })
       return onIntroDone(play)
     },
-    { scope: root, dependencies: [content.name] },
+    { scope: root, dependencies: [content.name], revertOnUpdate: true },
   )
 
   return (

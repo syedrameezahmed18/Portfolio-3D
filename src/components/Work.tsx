@@ -100,29 +100,39 @@ export default function Work() {
             anticipatePin: 1,
           },
         })
-        gsap.from('.work-card', {
-          opacity: 0,
-          y: 40,
-          duration: 1,
-          ease: 'power3.out',
-          stagger: 0.1,
-          scrollTrigger: { trigger: root.current, start: 'top 70%', once: true },
-        })
+        gsap.fromTo(
+          '.work-card',
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            stagger: 0.1,
+            scrollTrigger: { trigger: root.current, start: 'top 70%', once: true },
+          },
+        )
       })
       mm.add('(max-width: 1023px)', () => {
-        gsap.from('.work-card', {
-          opacity: 0,
-          y: 40,
-          duration: 1,
-          ease: 'power3.out',
-          stagger: 0.12,
-          scrollTrigger: { trigger: track.current, start: 'top 80%', once: true },
-        })
+        gsap.fromTo(
+          '.work-card',
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            stagger: 0.12,
+            scrollTrigger: { trigger: track.current, start: 'top 80%', once: true },
+          },
+        )
       })
       ScrollTrigger.refresh()
       return () => mm.revert()
     },
-    { scope: root, dependencies: [projects] },
+    // Revert on update so the fallback render's tweens and triggers are torn
+    // down when the database rows arrive, instead of piling up.
+    { scope: root, dependencies: [projects], revertOnUpdate: true },
   )
 
   return (

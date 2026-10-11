@@ -71,7 +71,7 @@ export default function About() {
         el.removeEventListener('mouseleave', leave)
       }
     },
-    { scope: root, dependencies: [c.paragraph1] },
+    { scope: root, dependencies: [c.paragraph1], revertOnUpdate: true },
   )
 
   return (

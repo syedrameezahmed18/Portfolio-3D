@@ -57,23 +57,35 @@ export default function Stack() {
   useGSAP(
     () => {
       if (prefersReducedMotion()) return
-      gsap.from('.meter-fill', {
-        scaleX: 0,
-        duration: 1.4,
-        ease: 'expo.out',
-        stagger: 0.05,
-        scrollTrigger: { trigger: '.meters', start: 'top 80%', once: true },
-      })
-      gsap.from('.meter', {
-        opacity: 0,
-        y: 16,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.04,
-        scrollTrigger: { trigger: '.meters', start: 'top 80%', once: true },
-      })
+      // Explicit end values: a `from` tween would capture whatever opacity the
+      // element happens to have when data swaps the list.
+      gsap.fromTo(
+        '.meter-fill',
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: 1.4,
+          ease: 'expo.out',
+          stagger: 0.05,
+          scrollTrigger: { trigger: '.meters', start: 'top 80%', once: true },
+        },
+      )
+      gsap.fromTo(
+        '.meter',
+        { opacity: 0, y: 16 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.04,
+          scrollTrigger: { trigger: '.meters', start: 'top 80%', once: true },
+        },
+      )
     },
-    { scope: root, dependencies: [skills] },
+    // Revert on update, or the tweens from the fallback render stay alive
+    // and keep reused rows pinned at their start state.
+    { scope: root, dependencies: [skills], revertOnUpdate: true },
   )
 
   return (
