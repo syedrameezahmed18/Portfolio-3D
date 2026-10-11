@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useRef } from 'react'
 import { ArrowDownRight } from 'lucide-react'
 import { gsap, heroProgress, onIntroDone, prefersReducedMotion, useGSAP } from '@/lib/motion'
 import { scrollToId } from '@/lib/smooth-scroll'
@@ -8,22 +8,9 @@ import Magnetic from './ui/Magnetic'
 
 const HeroScene = lazy(() => import('./HeroScene'))
 
-const useIsCompact = () => {
-  const [compact, setCompact] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px), (pointer: coarse)')
-    const update = () => setCompact(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
-  return compact
-}
-
-export default function Hero() {
+export default function Hero({ compact }: { compact: boolean }) {
   const root = useRef<HTMLElement>(null)
   const content = useSiteContent<HeroContent>('hero', heroFallback)
-  const compact = useIsCompact()
   const words = content.name.split(' ')
 
   useGSAP(

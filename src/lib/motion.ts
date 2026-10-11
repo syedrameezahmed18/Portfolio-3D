@@ -34,6 +34,9 @@ if (typeof window !== 'undefined') {
 /** 0 at the top of the page, 1 once the hero has fully scrolled away. */
 export const heroProgress = { value: 0 }
 
+/** Current scroll offset and velocity in pixels, fed by Lenis every frame. */
+export const scroll = { y: 0, velocity: 0 }
+
 /** Flipped to true when the preloader finishes; hero intros key off it. */
 export const intro = { done: false, listeners: new Set<() => void>() }
 export const onIntroDone = (cb: () => void) => {

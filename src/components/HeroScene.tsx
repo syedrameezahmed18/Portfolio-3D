@@ -95,43 +95,6 @@ function Shard({ simple }: { simple: boolean }) {
   )
 }
 
-/** Sparse drifting dust so the void has depth. */
-function Dust({ count = 260 }: { count?: number }) {
-  const ref = useRef<THREE.Points>(null)
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 16
-      arr[i * 3 + 1] = (Math.random() - 0.5) * 10
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 8 - 2
-    }
-    return arr
-  }, [count])
-
-  useFrame((state, delta) => {
-    if (!ref.current) return
-    ref.current.rotation.y += delta * 0.015
-    ref.current.position.y = THREE.MathUtils.damp(
-      ref.current.position.y,
-      -heroProgress.value * 2 + pointer.y * 0.1,
-      2,
-      delta,
-    )
-    ref.current.position.x = THREE.MathUtils.damp(ref.current.position.x, pointer.x * 0.15, 2, delta)
-    const m = ref.current.material as THREE.PointsMaterial
-    m.opacity = 0.55 + Math.sin(state.clock.elapsedTime * 0.8) * 0.1
-  })
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial size={0.02} color="#ece5d8" transparent opacity={0.6} sizeAttenuation depthWrite={false} />
-    </points>
-  )
-}
-
 export default function HeroScene({ simple }: { simple: boolean }) {
   return (
     <Canvas
@@ -141,6 +104,9 @@ export default function HeroScene({ simple }: { simple: boolean }) {
       performance={{ min: 0.5 }}
       style={{ pointerEvents: 'none' }}
     >
+      {/* Opaque, matching the page, so the composited output never shows a
+          lighter rectangle against the page while the entrance scales it. */}
+      <color attach="background" args={['#0b0a09']} />
       <ambientLight intensity={0.25} />
       <spotLight position={[6, 8, 6]} angle={0.5} penumbra={1} intensity={60} color="#fff4e6" />
       <pointLight position={[-6, -3, 2]} intensity={25} color={EMBER} />
@@ -153,7 +119,6 @@ export default function HeroScene({ simple }: { simple: boolean }) {
         <Float speed={1.1} rotationIntensity={0.35} floatIntensity={0.7}>
           <Shard simple={simple} />
         </Float>
-        <Dust count={simple ? 140 : 260} />
         {!simple && (
           <EffectComposer multisampling={0}>
             <Bloom mipmapBlur luminanceThreshold={0.55} intensity={0.75} radius={0.6} />

@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import Lenis from 'lenis'
-import { gsap, ScrollTrigger } from './motion'
+import { gsap, scroll, ScrollTrigger } from './motion'
 
 let lenis: Lenis | null = null
 // Children mount before the provider, so a lock requested during the
@@ -33,7 +33,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     })
     lenis = instance
     if (pendingLock) instance.stop()
-    instance.on('scroll', ScrollTrigger.update)
+    scroll.y = window.scrollY
+    instance.on('scroll', (e) => {
+      scroll.y = e.scroll
+      scroll.velocity = e.velocity
+      ScrollTrigger.update()
+    })
     const tick = (time: number) => instance.raf(time * 1000)
     gsap.ticker.add(tick)
     gsap.ticker.lagSmoothing(0)
