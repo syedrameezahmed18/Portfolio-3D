@@ -81,7 +81,7 @@ export default function Hero() {
 
       <div className="hero-meta label relative z-10 mb-auto flex items-center justify-between">
         <span>Portfolio · 2026</span>
-        <span className="hidden sm:inline">Leipzig, Germany</span>
+        <span className="hidden sm:inline">Germany</span>
       </div>
 
       <div className="hero-copy relative z-10 grid gap-10 md:grid-cols-12 md:items-end">

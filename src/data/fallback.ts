@@ -66,7 +66,7 @@ export const contactFallback: ContactContent = {
     'Got a project in mind or want to collaborate? I’m always open to discussing new projects, creative ideas or opportunities.',
   email: 'noir.ramsam@gmail.com',
   phone: '+49 176 67826120',
-  location: 'Leipzig, Germany',
+  location: 'Germany',
   github: 'https://github.com/syedrameezahmed18',
   linkedin: 'https://www.linkedin.com/in/syedrameezahmed18/',
 }

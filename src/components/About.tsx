@@ -100,7 +100,7 @@ export default function About() {
               className="relative h-full w-full object-cover grayscale-[20%] contrast-[1.05]"
               loading="lazy"
             />
-            <span className="label absolute bottom-4 left-4 bg-ink/80 px-2 py-1 backdrop-blur">Leipzig, DE</span>
+            <span className="label absolute bottom-4 left-4 bg-ink/80 px-2 py-1 backdrop-blur">Germany</span>
           </div>
         </div>
 

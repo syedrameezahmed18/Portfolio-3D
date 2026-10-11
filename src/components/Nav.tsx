@@ -11,7 +11,7 @@ const links = [
   { label: 'Contact', href: '#contact' },
 ]
 
-const useLeipzigTime = () => {
+const useGermanyTime = () => {
   const [time, setTime] = useState('')
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat('en-GB', {
@@ -31,7 +31,7 @@ export default function Nav() {
   const bar = useRef<HTMLElement>(null)
   const overlay = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
-  const time = useLeipzigTime()
+  const time = useGermanyTime()
 
   // Slide the bar away when scrolling down, bring it back on any upward move.
   useGSAP(() => {
@@ -103,7 +103,7 @@ export default function Nav() {
         </nav>
 
         <div className="hidden items-center gap-6 md:flex">
-          <span className="label tabular-nums">Leipzig {time}</span>
+          <span className="label tabular-nums">Germany {time}</span>
           <span className="label flex items-center gap-2">
             <span className="pulse-dot relative inline-block h-1.5 w-1.5 rounded-full bg-ember" />
             Open to work
@@ -144,7 +144,7 @@ export default function Nav() {
           ))}
         </nav>
         <div className="label mt-10 flex justify-between">
-          <span>Leipzig {time}</span>
+          <span>Germany {time}</span>
           <span>Open to work</span>
         </div>
       </div>
