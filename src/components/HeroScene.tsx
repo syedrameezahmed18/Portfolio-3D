@@ -12,6 +12,9 @@ function Shard({ simple }: { simple: boolean }) {
   const group = useRef<THREE.Group>(null)
   const core = useRef<THREE.Mesh>(null)
   const target = useMemo(() => new THREE.Vector3(), [])
+  // On narrow screens the copy fills the lower half, so the shard sits
+  // smaller and higher instead of behind the name.
+  const base = simple ? { x: 0.55, y: 0.95, scale: 0.58 } : { x: 0.6, y: 0, scale: 1 }
 
   useFrame((state, delta) => {
     const g = group.current
@@ -25,9 +28,9 @@ function Shard({ simple }: { simple: boolean }) {
     g.rotation.x = THREE.MathUtils.damp(g.rotation.x, rx, 3, delta)
     g.rotation.y = THREE.MathUtils.damp(g.rotation.y, ry, 3, delta)
 
-    target.set(pointer.x * 0.25, pointer.y * 0.15 - p * 1.4, -p * 3.5)
+    target.set(base.x + pointer.x * 0.25, base.y + pointer.y * 0.15 - p * 1.4, -p * 3.5)
     g.position.lerp(target, 1 - Math.exp(-3 * delta))
-    const s = 1 - p * 0.35
+    const s = base.scale * (1 - p * 0.35)
     g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, s, 3, delta))
 
     if (core.current) {
@@ -39,7 +42,7 @@ function Shard({ simple }: { simple: boolean }) {
   })
 
   return (
-    <group ref={group} position={[0.6, 0, 0]}>
+    <group ref={group} position={[base.x, base.y, 0]} scale={base.scale}>
       <mesh>
         <icosahedronGeometry args={[1.55, 0]} />
         {simple ? (

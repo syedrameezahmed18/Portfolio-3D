@@ -76,10 +76,12 @@ export default function Hero() {
         <Suspense fallback={null}>
           <HeroScene simple={compact} />
         </Suspense>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink to-transparent" />
+        {/* Scrim so the copy reads over the scene: heavy on phones, light on desktop. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%] bg-gradient-to-t from-ink via-ink/90 to-transparent md:hidden" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-1/3 bg-gradient-to-t from-ink to-transparent md:block" />
       </div>
 
-      <div className="hero-meta label relative z-10 mb-auto flex items-center justify-between">
+      <div className="hero-meta label relative z-10 mb-auto flex items-center justify-between pb-12">
         <span>Portfolio · 2026</span>
         <span className="hidden sm:inline">Germany</span>
       </div>
