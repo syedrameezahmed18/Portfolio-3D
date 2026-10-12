@@ -105,10 +105,10 @@ const minSide = (l: Layout) => Math.min(l.heightUnits, l.widthUnits)
 /** About: two thin rings, one ember, one bone, tilted and slowly turning. */
 function Halo({ layout, simple }: { layout: Layout; simple: boolean }) {
   const group = useRef<THREE.Group>(null)
-  const r = minSide(layout) * (simple ? 0.28 : 0.42)
+  const r = minSide(layout) * (simple ? 0.4 : 0.42)
   // On phones the paragraph spans the full width, so the halo hangs off the
   // top-right edge instead of sitting beside the text.
-  const pos = simple ? place(layout, 'about', 0.92, 0.03, -1) : place(layout, 'about', 0.82, 0.3, -1)
+  const pos = simple ? place(layout, 'about', 1.0, 0.0, -1) : place(layout, 'about', 0.82, 0.3, -1)
   useFrame((state, delta) => {
     if (!group.current) return
     group.current.rotation.z += delta * 0.08 + scroll.velocity * 0.00015
@@ -153,8 +153,8 @@ function Shards({ layout, count, simple }: { layout: Layout; count: number; simp
   return (
     <group
       ref={group}
-      position={simple ? place(layout, 'capabilities', 0.9, -0.03, -1.5) : place(layout, 'capabilities', 0.8, 0.13, -1.5)}
-      scale={simple ? 0.38 : 1}
+      position={simple ? place(layout, 'capabilities', 0.95, 0.02, -1.5) : place(layout, 'capabilities', 0.8, 0.13, -1.5)}
+      scale={simple ? 0.55 : 1}
     >
       <pointLight position={[1.5, 1, 2]} intensity={14} color={EMBER} distance={8} />
       {items.map((it, i) => (
@@ -184,8 +184,8 @@ function Knot({ layout, simple }: { layout: Layout; simple: boolean }) {
   return (
     <mesh
       ref={mesh}
-      position={simple ? place(layout, 'stack', 0.9, 0.0, -2.5) : place(layout, 'stack', 0.8, 0.1, -2.5)}
-      scale={minSide(layout) * (simple ? 0.13 : 0.22)}
+      position={simple ? place(layout, 'stack', 0.92, -0.02, -2.5) : place(layout, 'stack', 0.8, 0.1, -2.5)}
+      scale={minSide(layout) * (simple ? 0.19 : 0.22)}
     >
       <torusKnotGeometry args={[1, 0.3, 180, 20, 2, 5]} />
       <meshBasicMaterial color={BONE} wireframe transparent opacity={0.09} />
@@ -197,7 +197,7 @@ function Knot({ layout, simple }: { layout: Layout; simple: boolean }) {
 function Orb({ layout, simple }: { layout: Layout; simple: boolean }) {
   const glow = useGlowTexture()
   const group = useRef<THREE.Group>(null)
-  const r = minSide(layout) * (simple ? 0.17 : 0.24)
+  const r = minSide(layout) * (simple ? 0.24 : 0.24)
   useFrame((state, delta) => {
     if (!group.current) return
     const t = state.clock.elapsedTime
@@ -206,7 +206,7 @@ function Orb({ layout, simple }: { layout: Layout; simple: boolean }) {
   })
   // Low in the bottom-right corner, under the submit row, so the headline
   // and the form fields stay on dark ground.
-  const [x, y, z] = simple ? place(layout, 'contact', 0.98, 1.0, -2) : place(layout, 'contact', 0.93, 1.04, -2)
+  const [x, y, z] = simple ? place(layout, 'contact', 1.02, 1.02, -2) : place(layout, 'contact', 0.93, 1.04, -2)
   return (
     <group ref={group} position={[x, y, z]} userData={{ x }}>
       <sprite scale={[r * 7, r * 7, 1]}>
