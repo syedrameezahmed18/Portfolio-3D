@@ -6,6 +6,20 @@ import { aboutFallback, type AboutContent } from '@/data/fallback'
 import portrait from '@/assets/main-profile.jpg'
 import Magnetic from './ui/Magnetic'
 
+/** Two-column numbered list; `offset` lets a second group continue the count. */
+function HighlightList({ items, offset }: { items: string[]; offset: number }) {
+  return (
+    <ul className="grid grid-cols-2 gap-x-6">
+      {items.map((h, i) => (
+        <li key={h} className="line-top flex items-baseline gap-3 py-4 text-base">
+          <span className="font-mono text-xs text-ember">{String(offset + i + 1).padStart(2, '0')}</span>
+          {h}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export default function About() {
   const root = useRef<HTMLElement>(null)
   const card = useRef<HTMLDivElement>(null)
@@ -107,14 +121,15 @@ export default function About() {
         <div className="md:col-span-6 md:col-start-7">
           <p className="about-rise text-lg leading-relaxed text-bone-dim md:text-xl">{c.paragraph2}</p>
 
-          <ul className="about-rise mt-10 grid grid-cols-2 gap-x-6">
-            {c.highlights.map((h, i) => (
-              <li key={h} className="line-top flex items-baseline gap-3 py-4 text-base">
-                <span className="font-mono text-xs text-ember">0{i + 1}</span>
-                {h}
-              </li>
-            ))}
-          </ul>
+          <div className="about-rise mt-10">
+            <p className="label mb-2">Frontend</p>
+            <HighlightList items={c.highlights} offset={0} />
+          </div>
+
+          <div className="about-rise mt-8">
+            <p className="label mb-2">Backend</p>
+            <HighlightList items={c.backend_highlights} offset={c.highlights.length} />
+          </div>
 
           <div className="about-rise mt-10 flex flex-wrap items-center gap-4">
             <Magnetic>

@@ -13,6 +13,7 @@ export interface AboutContent {
   paragraph1: string
   paragraph2: string
   highlights: string[]
+  backend_highlights: string[]
   hire_url: string
   cv_url: string
 }
@@ -57,6 +58,7 @@ export const aboutFallback: AboutContent = {
   paragraph2:
     'My expertise lies in the React and Next ecosystem on the frontend, but I’m always exploring new technologies to stay at the cutting edge of web development.',
   highlights: ['React & Next.js', 'TypeScript', 'Tailwind CSS', 'UI/UX Design'],
+  backend_highlights: ['Node.js & NestJS', 'FastAPI', 'Postgres & Redis', 'Docker & Azure'],
   hire_url: 'https://www.linkedin.com/in/syed-rameez-ahmed-6b5984199/',
   cv_url: '/Syed_Rameez_Ahmed_CV_2025.pdf',
 }
