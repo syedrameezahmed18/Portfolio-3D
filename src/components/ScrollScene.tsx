@@ -3,9 +3,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Float } from '@react-three/drei'
 import * as THREE from 'three'
 import { pointer, scroll, ScrollTrigger } from '@/lib/motion'
+import { scenePalette, useTheme } from '@/lib/theme'
 
-const EMBER = '#ff6a3d'
-const BONE = '#ece5d8'
+type Palette = ReturnType<typeof scenePalette>
 
 /**
  * Page-space layout shared by every object: where each section sits in
@@ -82,28 +82,36 @@ function Rig({ layout }: { layout: Layout }) {
 }
 
 /** Soft radial glow sprite used behind the ember orb. */
-const useGlowTexture = () =>
+const useGlowTexture = (ember: string) =>
   useMemo(() => {
     const size = 256
     const c = document.createElement('canvas')
     c.width = c.height = size
     const ctx = c.getContext('2d')!
+    const { r, g: gg, b } = new THREE.Color(ember)
+    const rgb = `${Math.round(r * 255)},${Math.round(gg * 255)},${Math.round(b * 255)}`
     const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-    g.addColorStop(0, 'rgba(255,106,61,0.9)')
-    g.addColorStop(0.35, 'rgba(255,106,61,0.35)')
-    g.addColorStop(1, 'rgba(255,106,61,0)')
+    g.addColorStop(0, `rgba(${rgb},0.9)`)
+    g.addColorStop(0.35, `rgba(${rgb},0.35)`)
+    g.addColorStop(1, `rgba(${rgb},0)`)
     ctx.fillStyle = g
     ctx.fillRect(0, 0, size, size)
     const t = new THREE.CanvasTexture(c)
     t.colorSpace = THREE.SRGBColorSpace
     return t
-  }, [])
+  }, [ember])
 
 /** Shorter viewport side in world units; keeps objects proportionate on phones. */
 const minSide = (l: Layout) => Math.min(l.heightUnits, l.widthUnits)
 
+interface ObjProps {
+  layout: Layout
+  simple: boolean
+  p: Palette
+}
+
 /** About: two thin rings, one ember, one bone, tilted and slowly turning. */
-function Halo({ layout, simple }: { layout: Layout; simple: boolean }) {
+function Halo({ layout, simple, p }: ObjProps) {
   const group = useRef<THREE.Group>(null)
   const r = minSide(layout) * (simple ? 0.4 : 0.42)
   // On phones the paragraph spans the full width, so the halo hangs off the
@@ -119,22 +127,22 @@ function Halo({ layout, simple }: { layout: Layout; simple: boolean }) {
     <group ref={group} position={pos}>
       <mesh>
         <torusGeometry args={[r, 0.012, 8, 160]} />
-        <meshBasicMaterial color={EMBER} transparent opacity={0.9} />
+        <meshBasicMaterial color={p.ember} transparent opacity={0.9} />
       </mesh>
       <mesh rotation={[0.4, 0.2, 0]}>
         <torusGeometry args={[r * 1.18, 0.006, 8, 160]} />
-        <meshBasicMaterial color={BONE} transparent opacity={0.16} />
+        <meshBasicMaterial color={p.line} transparent opacity={0.16} />
       </mesh>
       <mesh rotation={[-0.3, 0.5, 0]}>
         <torusGeometry args={[r * 0.7, 0.004, 8, 120]} />
-        <meshBasicMaterial color={BONE} transparent opacity={0.1} />
+        <meshBasicMaterial color={p.line} transparent opacity={0.1} />
       </mesh>
     </group>
   )
 }
 
 /** Capabilities: a loose cluster of dark glassy shards with an ember rim. */
-function Shards({ layout, count, simple }: { layout: Layout; count: number; simple: boolean }) {
+function Shards({ layout, count, simple, p }: ObjProps & { count: number }) {
   const items = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
@@ -156,16 +164,16 @@ function Shards({ layout, count, simple }: { layout: Layout; count: number; simp
       position={simple ? place(layout, 'capabilities', 0.95, 0.02, -1.5) : place(layout, 'capabilities', 0.8, 0.13, -1.5)}
       scale={simple ? 0.55 : 1}
     >
-      <pointLight position={[1.5, 1, 2]} intensity={14} color={EMBER} distance={8} />
+      <pointLight position={[1.5, 1, 2]} intensity={14} color={p.ember} distance={8} />
       {items.map((it, i) => (
         <Float key={i} speed={it.speed} rotationIntensity={1.2} floatIntensity={1.4}>
           <mesh position={it.pos} scale={it.scale}>
             <icosahedronGeometry args={[1, 0]} />
-            <meshPhysicalMaterial color="#17140f" roughness={0.18} metalness={0.3} clearcoat={1} clearcoatRoughness={0.15} />
+            <meshPhysicalMaterial color={p.shard} roughness={0.18} metalness={0.3} clearcoat={1} clearcoatRoughness={0.15} />
           </mesh>
           <mesh position={it.pos} scale={it.scale * 1.01}>
             <icosahedronGeometry args={[1, 0]} />
-            <meshBasicMaterial color={BONE} wireframe transparent opacity={0.14} />
+            <meshBasicMaterial color={p.line} wireframe transparent opacity={0.14} />
           </mesh>
         </Float>
       ))}
@@ -174,7 +182,7 @@ function Shards({ layout, count, simple }: { layout: Layout; count: number; simp
 }
 
 /** Stack: a large wireframe knot drifting behind the marquee. */
-function Knot({ layout, simple }: { layout: Layout; simple: boolean }) {
+function Knot({ layout, simple, p }: ObjProps) {
   const mesh = useRef<THREE.Mesh>(null)
   useFrame((_, delta) => {
     if (!mesh.current) return
@@ -188,14 +196,14 @@ function Knot({ layout, simple }: { layout: Layout; simple: boolean }) {
       scale={minSide(layout) * (simple ? 0.19 : 0.22)}
     >
       <torusKnotGeometry args={[1, 0.3, 180, 20, 2, 5]} />
-      <meshBasicMaterial color={BONE} wireframe transparent opacity={0.09} />
+      <meshBasicMaterial color={p.line} wireframe transparent opacity={0.09} />
     </mesh>
   )
 }
 
 /** Contact: an ember sun sitting low behind the headline. */
-function Orb({ layout, simple }: { layout: Layout; simple: boolean }) {
-  const glow = useGlowTexture()
+function Orb({ layout, simple, p }: ObjProps) {
+  const glow = useGlowTexture(p.ember)
   const group = useRef<THREE.Group>(null)
   const r = minSide(layout) * (simple ? 0.24 : 0.24)
   useFrame((state, delta) => {
@@ -214,19 +222,19 @@ function Orb({ layout, simple }: { layout: Layout; simple: boolean }) {
       </sprite>
       <mesh>
         <sphereGeometry args={[r, 64, 64]} />
-        <meshStandardMaterial color="#2a1309" emissive={EMBER} emissiveIntensity={1.1} roughness={0.9} />
+        <meshStandardMaterial color="#2a1309" emissive={p.ember} emissiveIntensity={1.1} roughness={0.9} />
       </mesh>
       <mesh rotation={[1.2, 0, 0]}>
         <torusGeometry args={[r * 1.35, 0.006, 8, 160]} />
-        <meshBasicMaterial color={BONE} transparent opacity={0.18} />
+        <meshBasicMaterial color={p.line} transparent opacity={0.18} />
       </mesh>
-      <pointLight intensity={30} color={EMBER} distance={14} decay={2} />
+      <pointLight intensity={30} color={p.ember} distance={14} decay={2} />
     </group>
   )
 }
 
 /** Dust spread over the whole document so the void never reads as flat. */
-function Dust({ layout, count }: { layout: Layout; count: number }) {
+function Dust({ layout, count, color }: { layout: Layout; count: number; color: string }) {
   const ref = useRef<THREE.Points>(null)
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
@@ -247,27 +255,29 @@ function Dust({ layout, count }: { layout: Layout; count: number }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.022} color={BONE} transparent opacity={0.5} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.022} color={color} transparent opacity={0.5} sizeAttenuation depthWrite={false} />
     </points>
   )
 }
 
 function Scene({ simple: lightweight }: { simple: boolean }) {
   const layout = useLayout()
+  const theme = useTheme()
   if (!layout) return null
+  const p = scenePalette(theme)
   // Any portrait viewport gets the compact placement, not only touch devices,
   // so browser device emulation with a mouse still sizes objects for a phone.
   const simple = lightweight || layout.widthUnits < layout.heightUnits
   return (
     <>
       <Rig layout={layout} />
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={theme === 'light' ? 0.7 : 0.35} />
       <directionalLight position={[4, 6, 5]} intensity={1.6} color="#fff1e4" />
-      <Halo layout={layout} simple={simple} />
-      <Shards layout={layout} count={simple ? 5 : 8} simple={simple} />
-      <Knot layout={layout} simple={simple} />
-      <Orb layout={layout} simple={simple} />
-      <Dust layout={layout} count={simple ? 220 : 420} />
+      <Halo layout={layout} simple={simple} p={p} />
+      <Shards layout={layout} count={simple ? 5 : 8} simple={simple} p={p} />
+      <Knot layout={layout} simple={simple} p={p} />
+      <Orb layout={layout} simple={simple} p={p} />
+      <Dust layout={layout} count={simple ? 220 : 420} color={p.dust} />
     </>
   )
 }

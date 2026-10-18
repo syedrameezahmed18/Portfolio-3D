@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, useGSAP } from '@/lib/motion'
 import { lockScroll, scrollToId } from '@/lib/smooth-scroll'
 import Magnetic from './ui/Magnetic'
+import ThemeToggle from './ThemeToggle'
 
 const links = [
   { label: 'About', href: '#about' },
@@ -78,7 +79,7 @@ export default function Nav() {
     <>
       <header
         ref={bar}
-        className="fixed top-0 left-0 z-50 flex w-full items-center justify-between px-6 py-5 mix-blend-difference md:px-10"
+        className="blend-dark fixed top-0 left-0 z-50 flex w-full items-center justify-between px-6 py-5 md:px-10"
       >
         <button
           type="button"
@@ -108,19 +109,23 @@ export default function Nav() {
             <span className="pulse-dot relative inline-block h-1.5 w-1.5 rounded-full bg-ember" />
             Open to work
           </span>
+          <ThemeToggle />
         </div>
 
-        <Magnetic className="md:hidden">
-          <button
-            type="button"
-            onClick={() => toggle(!open)}
-            className="label flex h-10 items-center"
-            aria-expanded={open}
-            aria-controls="menu"
-          >
-            {open ? 'Close' : 'Menu'}
-          </button>
-        </Magnetic>
+        <div className="flex items-center gap-3 md:hidden">
+          <ThemeToggle />
+          <Magnetic>
+            <button
+              type="button"
+              onClick={() => toggle(!open)}
+              className="label flex h-10 items-center"
+              aria-expanded={open}
+              aria-controls="menu"
+            >
+              {open ? 'Close' : 'Menu'}
+            </button>
+          </Magnetic>
+        </div>
       </header>
 
       <div

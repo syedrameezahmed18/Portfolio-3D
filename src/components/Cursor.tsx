@@ -74,7 +74,7 @@ export default function Cursor() {
       <div
         ref={ring}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[80] flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-bone/40 mix-blend-difference"
+        className="blend-dark pointer-events-none fixed top-0 left-0 z-[80] flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-bone/40"
       >
         <span className="font-mono text-[3px] tracking-widest text-bone uppercase">{label}</span>
       </div>

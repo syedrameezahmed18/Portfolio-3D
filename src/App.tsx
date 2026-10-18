@@ -4,6 +4,7 @@ import { useIsCompact } from '@/hooks/useIsCompact'
 import Preloader from '@/components/Preloader'
 import Cursor from '@/components/Cursor'
 import Grain from '@/components/Grain'
+import Ambient from '@/components/Ambient'
 import ScrollProgress from '@/components/ScrollProgress'
 import Nav from '@/components/Nav'
 import Hero from '@/components/Hero'
@@ -25,6 +26,7 @@ export default function App() {
       <Grain />
       <ScrollProgress />
       <Nav />
+      <Ambient />
       <Suspense fallback={null}>
         <ScrollScene simple={compact} />
       </Suspense>

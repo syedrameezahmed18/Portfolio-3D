@@ -1,14 +1,17 @@
-import { Suspense, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, Float, Lightformer, MeshTransmissionMaterial } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { heroProgress, pointer } from '@/lib/motion'
+import { scenePalette, useTheme } from '@/lib/theme'
 
-const EMBER = new THREE.Color('#ff6a3d')
+type Palette = ReturnType<typeof scenePalette>
 
 /** A glass shard refracting an ember core, steered by the pointer and scroll. */
-function Shard({ simple }: { simple: boolean }) {
+function Shard({ simple, p }: { simple: boolean; p: Palette }) {
+  const ember = useMemo(() => new THREE.Color(p.ember), [p.ember])
+  const bg = useMemo(() => new THREE.Color(p.bg), [p.bg])
   const group = useRef<THREE.Group>(null)
   const core = useRef<THREE.Mesh>(null)
   const target = useMemo(() => new THREE.Vector3(), [])
@@ -58,7 +61,7 @@ function Shard({ simple }: { simple: boolean }) {
             distortionScale={0.4}
             ior={1.35}
             color="#f3ede2"
-            background={new THREE.Color('#0b0a09')}
+            background={bg}
           />
         ) : (
           <MeshTransmissionMaterial
@@ -73,19 +76,19 @@ function Shard({ simple }: { simple: boolean }) {
             temporalDistortion={0.1}
             ior={1.35}
             color="#f3ede2"
-            background={new THREE.Color('#0b0a09')}
+            background={bg}
           />
         )}
       </mesh>
       <mesh>
         <icosahedronGeometry args={[1.56, 0]} />
-        <meshBasicMaterial color="#ece5d8" wireframe transparent opacity={0.18} />
+        <meshBasicMaterial color={p.line} wireframe transparent opacity={0.18} />
       </mesh>
       <mesh ref={core}>
         <torusKnotGeometry args={[0.42, 0.14, 160, 24, 2, 3]} />
         <meshStandardMaterial
-          color={EMBER}
-          emissive={EMBER}
+          color={ember}
+          emissive={ember}
           emissiveIntensity={simple ? 1.2 : 2.4}
           roughness={0.35}
           metalness={0.1}
@@ -95,7 +98,27 @@ function Shard({ simple }: { simple: boolean }) {
   )
 }
 
+/**
+ * Dark mode paints an opaque page-coloured background so the bloom pass
+ * never composites as a lighter rectangle. Light mode has no bloom and wants
+ * the ambient wash to show through, so the canvas stays transparent.
+ */
+function Background({ color }: { color: string | null }) {
+  const scene = useThree((s) => s.scene)
+  useEffect(() => {
+    scene.background = color ? new THREE.Color(color) : null
+    return () => {
+      scene.background = null
+    }
+  }, [scene, color])
+  return null
+}
+
 export default function HeroScene({ simple }: { simple: boolean }) {
+  const theme = useTheme()
+  const p = scenePalette(theme)
+  // Bloom would flare the whole bright background in light mode.
+  const bloom = !simple && theme === 'dark'
   return (
     <Canvas
       dpr={simple ? [1, 1.25] : [1, 1.75]}
@@ -106,10 +129,10 @@ export default function HeroScene({ simple }: { simple: boolean }) {
     >
       {/* Opaque, matching the page, so the composited output never shows a
           lighter rectangle against the page while the entrance scales it. */}
-      <color attach="background" args={['#0b0a09']} />
-      <ambientLight intensity={0.25} />
+      <Background color={theme === 'dark' ? p.bg : null} />
+      <ambientLight intensity={theme === 'light' ? 0.6 : 0.25} />
       <spotLight position={[6, 8, 6]} angle={0.5} penumbra={1} intensity={60} color="#fff4e6" />
-      <pointLight position={[-6, -3, 2]} intensity={25} color={EMBER} />
+      <pointLight position={[-6, -3, 2]} intensity={25} color={p.ember} />
       <Suspense fallback={null}>
         <Environment resolution={128} frames={1}>
           <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
@@ -117,9 +140,9 @@ export default function HeroScene({ simple }: { simple: boolean }) {
           <Lightformer intensity={0.8} rotation-y={-Math.PI / 2} position={[8, 1, 0]} scale={[12, 2, 1]} />
         </Environment>
         <Float speed={1.1} rotationIntensity={0.35} floatIntensity={0.7}>
-          <Shard simple={simple} />
+          <Shard simple={simple} p={p} />
         </Float>
-        {!simple && (
+        {bloom && (
           <EffectComposer multisampling={0}>
             <Bloom mipmapBlur luminanceThreshold={0.55} intensity={0.75} radius={0.6} />
           </EffectComposer>

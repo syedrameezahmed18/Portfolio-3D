@@ -10,6 +10,16 @@
     />
     <meta name="author" content="Syed Rameez Ahmed" />
     <meta name="theme-color" content="#0b0a09" />
+    <!-- Apply the saved theme before first paint so there is no flash. -->
+    <script>
+      try {
+        var t = localStorage.getItem('portfolio-theme');
+        document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark';
+        if (t === 'light') document.querySelector('meta[name="theme-color"]').content = '#f4efe7';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

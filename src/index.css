@@ -20,6 +20,37 @@
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
+/* Light palette: warm paper, near-black ink, a deeper ember for contrast. */
+:root[data-theme="light"] {
+  --color-ink: #f4efe7;
+  --color-ink-2: #ece6dc;
+  --color-ink-3: #e3dccf;
+  --color-bone: #15120f;
+  --color-bone-dim: #5f584f;
+  --color-bone-mute: #9a9185;
+  --color-ember: #e8512a;
+  --color-ember-deep: #b53d14;
+  --color-line: rgb(21 18 15 / 0.12);
+}
+
+/* Difference blending only reads correctly against the dark palette. */
+:root[data-theme="dark"] .blend-dark {
+  mix-blend-mode: difference;
+}
+
+/* Theme switch: the new theme wipes in as a circle (see toggleTheme). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+
 @layer base {
   html {
     scroll-behavior: auto;
@@ -216,10 +247,97 @@
   border-bottom-color: var(--color-ember-deep);
 }
 
+/* Ambient background: three drifting colour fields plus a slow sheen. */
+.ambient {
+  --amb-a: rgb(255 106 61 / 0.07);
+  --amb-b: rgb(120 60 140 / 0.05);
+  --amb-c: rgb(255 180 120 / 0.04);
+  --amb-sheen: rgb(255 255 255 / 0.015);
+  --amb-blur: 90px;
+}
+:root[data-theme="light"] .ambient {
+  --amb-a: rgb(255 140 96 / 0.5);
+  --amb-b: rgb(255 205 160 / 0.6);
+  --amb-c: rgb(150 175 205 / 0.35);
+  --amb-sheen: rgb(255 255 255 / 0.35);
+  --amb-blur: 110px;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(var(--amb-blur));
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+.ambient-a {
+  width: 60vmax;
+  height: 60vmax;
+  top: -20vmax;
+  left: -15vmax;
+  background: radial-gradient(circle at 50% 50%, var(--amb-a), transparent 65%);
+  animation: ambient-a 38s ease-in-out infinite alternate;
+}
+.ambient-b {
+  width: 55vmax;
+  height: 55vmax;
+  right: -20vmax;
+  top: 20vh;
+  background: radial-gradient(circle at 50% 50%, var(--amb-b), transparent 65%);
+  animation: ambient-b 46s ease-in-out infinite alternate;
+}
+.ambient-c {
+  width: 50vmax;
+  height: 50vmax;
+  left: 20vw;
+  bottom: -25vmax;
+  background: radial-gradient(circle at 50% 50%, var(--amb-c), transparent 65%);
+  animation: ambient-c 54s ease-in-out infinite alternate;
+}
+.ambient-sheen {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 40%, var(--amb-sheen) 50%, transparent 60%);
+  animation: ambient-sheen 28s linear infinite;
+}
+@keyframes ambient-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(28vw, 22vh, 0) scale(1.18);
+  }
+}
+@keyframes ambient-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-30vw, 28vh, 0) scale(0.9);
+  }
+}
+@keyframes ambient-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  to {
+    transform: translate3d(22vw, -26vh, 0) scale(1.2);
+  }
+}
+@keyframes ambient-sheen {
+  from {
+    transform: translate3d(-30%, 0, 0);
+  }
+  to {
+    transform: translate3d(30%, 0, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track,
   .scroll-hint,
-  .pulse-dot::after {
+  .pulse-dot::after,
+  .ambient-blob,
+  .ambient-sheen {
     animation: none;
   }
 }
