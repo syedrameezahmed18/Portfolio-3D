@@ -254,10 +254,10 @@
 
 /* Ambient background: three drifting colour fields plus a slow sheen. */
 .ambient {
-  --amb-a: rgb(255 106 61 / 0.07);
-  --amb-b: rgb(120 60 140 / 0.05);
-  --amb-c: rgb(255 180 120 / 0.04);
-  --amb-sheen: rgb(255 255 255 / 0.015);
+  --amb-a: rgb(255 106 61 / 0.14);
+  --amb-b: rgb(130 60 150 / 0.1);
+  --amb-c: rgb(255 180 120 / 0.09);
+  --amb-sheen: rgb(255 255 255 / 0.04);
   --amb-blur: 90px;
 }
 :root[data-theme="light"] .ambient {
@@ -280,7 +280,7 @@
   top: -20vmax;
   left: -15vmax;
   background: radial-gradient(circle at 50% 50%, var(--amb-a), transparent 65%);
-  animation: ambient-a 38s ease-in-out infinite alternate;
+  animation: ambient-a 22s ease-in-out infinite alternate;
 }
 .ambient-b {
   width: 55vmax;
@@ -288,7 +288,7 @@
   right: -20vmax;
   top: 20vh;
   background: radial-gradient(circle at 50% 50%, var(--amb-b), transparent 65%);
-  animation: ambient-b 46s ease-in-out infinite alternate;
+  animation: ambient-b 27s ease-in-out infinite alternate;
 }
 .ambient-c {
   width: 50vmax;
@@ -296,13 +296,13 @@
   left: 20vw;
   bottom: -25vmax;
   background: radial-gradient(circle at 50% 50%, var(--amb-c), transparent 65%);
-  animation: ambient-c 54s ease-in-out infinite alternate;
+  animation: ambient-c 33s ease-in-out infinite alternate;
 }
 .ambient-sheen {
   position: absolute;
   inset: -50%;
   background: linear-gradient(115deg, transparent 40%, var(--amb-sheen) 50%, transparent 60%);
-  animation: ambient-sheen 28s linear infinite;
+  animation: ambient-sheen 16s linear infinite;
 }
 @keyframes ambient-a {
   from {
