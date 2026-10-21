@@ -152,7 +152,7 @@ INSERT INTO public.site_content (section, content) VALUES
   'phone',    '+49 176 67826120',
   'location', 'Leipzig, Germany',
   'github',   'https://github.com/syedrameezahmed18',
-  'linkedin', 'https://www.linkedin.com/in/syedrameezahmed18/'
+  'linkedin', 'https://www.linkedin.com/in/syed-rameez-ahmed-6b5984199/'
 ));
 
 INSERT INTO public.skills (category, name, percentage, icon, sort_order) VALUES

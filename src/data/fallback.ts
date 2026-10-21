@@ -70,7 +70,7 @@ export const contactFallback: ContactContent = {
   phone: '+49 176 67826120',
   location: 'Germany',
   github: 'https://github.com/syedrameezahmed18',
-  linkedin: 'https://www.linkedin.com/in/syedrameezahmed18/',
+  linkedin: 'https://www.linkedin.com/in/syed-rameez-ahmed-6b5984199/',
 }
 
 /** Local artwork for projects the database knows but has no image for. */
