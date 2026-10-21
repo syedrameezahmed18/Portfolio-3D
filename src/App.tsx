@@ -1,44 +1,37 @@
 import { lazy, Suspense } from 'react'
-import { SmoothScroll } from '@/lib/smooth-scroll'
-import { useIsCompact } from '@/hooks/useIsCompact'
-import Preloader from '@/components/Preloader'
-import Cursor from '@/components/Cursor'
-import Grain from '@/components/Grain'
-import Ambient from '@/components/Ambient'
-import ScrollProgress from '@/components/ScrollProgress'
-import Nav from '@/components/Nav'
-import Hero from '@/components/Hero'
-import About from '@/components/About'
-import Work from '@/components/Work'
-import Capabilities from '@/components/Capabilities'
-import Stack from '@/components/Stack'
-import Contact from '@/components/Contact'
-import Footer from '@/components/Footer'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from '@/hooks/useAuth'
+import { ToastProvider } from '@/components/admin/ui'
+import Site from '@/pages/Site'
 
-const ScrollScene = lazy(() => import('@/components/ScrollScene'))
+// The admin panel is split out so visitors never download it.
+const Admin = lazy(() => import('@/pages/admin/Admin'))
+const AdminLogin = lazy(() => import('@/pages/admin/Login'))
+
+/** Auth and toasts only exist under /admin; the public site never touches them. */
+function AdminRoot() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
+      </ToastProvider>
+    </AuthProvider>
+  )
+}
 
 export default function App() {
-  const compact = useIsCompact()
   return (
-    <SmoothScroll>
-      <Preloader />
-      <Cursor />
-      <Grain />
-      <ScrollProgress />
-      <Nav />
-      <Ambient />
-      <Suspense fallback={null}>
-        <ScrollScene simple={compact} />
-      </Suspense>
-      <main className="relative z-[1]">
-        <Hero compact={compact} />
-        <About />
-        <Work />
-        <Capabilities />
-        <Stack />
-        <Contact />
-      </main>
-      <Footer />
-    </SmoothScroll>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Site />} />
+        <Route path="/admin" element={<AdminRoot />}>
+          <Route index element={<Admin />} />
+          <Route path="login" element={<AdminLogin />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

@@ -77,15 +77,16 @@
     color: var(--color-ink);
   }
 
-  /* Native cursor is replaced by the custom one on precise pointers. */
+  /* Native cursor is replaced by the custom one on precise pointers, but only
+     while the custom cursor is mounted (the admin panel keeps the native one). */
   @media (pointer: fine) {
-    body,
-    a,
-    button,
-    [role="button"],
-    input,
-    textarea,
-    label {
+    body.has-cursor,
+    body.has-cursor a,
+    body.has-cursor button,
+    body.has-cursor [role="button"],
+    body.has-cursor input,
+    body.has-cursor textarea,
+    body.has-cursor label {
       cursor: none;
     }
   }

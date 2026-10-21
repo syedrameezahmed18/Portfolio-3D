@@ -59,13 +59,28 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['skills']['Row']>
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: 'admin'
+          user_id: string
+        }
+        Insert: { created_at?: string; id?: string; role: 'admin'; user_id: string }
+        Update: { created_at?: string; id?: string; role?: 'admin'; user_id?: string }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Functions: {
+      admin_exists: { Args: Record<string, never>; Returns: boolean }
+    }
+    Enums: { app_role: 'admin' }
     CompositeTypes: Record<string, never>
   }
 }
 
 export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
+export type TablesInsert<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Insert']

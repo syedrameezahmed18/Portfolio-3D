@@ -15,6 +15,8 @@ export default function Cursor() {
   useEffect(() => {
     if (!isFinePointer()) return
     setEnabled(true)
+    document.body.classList.add('has-cursor')
+    return () => document.body.classList.remove('has-cursor')
   }, [])
 
   useEffect(() => {

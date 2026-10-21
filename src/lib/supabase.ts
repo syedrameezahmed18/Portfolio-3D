@@ -13,5 +13,10 @@ export const isSupabaseConfigured = Boolean(url && key)
 export const supabase = createClient<Database>(
   url || 'https://placeholder.supabase.co',
   key || 'placeholder',
-  { auth: { persistSession: false, autoRefreshToken: false } },
+  // Sessions persist so the admin panel stays signed in across reloads.
+  { auth: { persistSession: true, autoRefreshToken: true } },
 )
+
+/** Human-readable message from a Supabase or generic error. */
+export const errorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : typeof err === 'string' ? err : 'Something went wrong'
