@@ -32,8 +32,14 @@ const COLORS: Record<Theme, { a: string; b: string; maxAlpha: number; glow: numb
   light: { a: '232,81,42', b: '214,150,70', maxAlpha: 0.4, glow: 2.4, star: ['232,81,42', '214,150,70'], starAlpha: 0.55 },
 }
 
-/** Seconds until the next shooting star: a few seconds, with some variance. */
-const nextStarDelay = () => 2.5 + Math.random() * 5
+/** Seconds until the next shooting star: frequent, with some variance. */
+const nextStarDelay = () => 0.7 + Math.random() * 1.8
+
+/** How many stars to launch together: usually one, sometimes a small burst. */
+const burstSize = () => {
+  const r = Math.random()
+  return r < 0.55 ? 1 : r < 0.85 ? 2 : 3
+}
 
 /**
  * Slow-drifting colour fields behind everything plus a field of rising
@@ -53,7 +59,7 @@ export default function Ambient() {
     const palette = COLORS[theme]
     let motes: Mote[] = []
     let stars: Star[] = []
-    let nextStar = 1.5 + Math.random() * 2
+    let nextStar = 0.8 + Math.random() * 1.2
     let w = 0
     let h = 0
     let dpr = 1
@@ -81,7 +87,7 @@ export default function Ambient() {
 
     const drawStar = (s: Star) => {
       // Bright for most of its life, then a quick fade.
-      const k = s.age / s.life
+      const k = Math.max(0, s.age) / s.life
       const a = palette.starAlpha * (k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3)
       const mag = Math.hypot(s.vx, s.vy)
       const tx = s.x - (s.vx / mag) * s.len
@@ -161,11 +167,18 @@ export default function Ambient() {
       if (!reduced) {
         nextStar -= dt
         if (nextStar <= 0) {
-          stars.push(spawnStar())
+          // Members of a burst are offset slightly so they do not overlap.
+          const n = burstSize()
+          for (let i = 0; i < n; i++) {
+            const s = spawnStar()
+            s.age = -i * 0.12
+            stars.push(s)
+          }
           nextStar = nextStarDelay()
         }
         for (const s of stars) {
           s.age += dt
+          if (s.age < 0) continue // still waiting its turn in a burst
           s.x += s.vx * dt
           s.y += s.vy * dt
           drawStar(s)
