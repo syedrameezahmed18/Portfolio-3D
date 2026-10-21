@@ -13,12 +13,27 @@ interface Mote {
   warm: boolean
 }
 
-const COLORS: Record<Theme, { a: string; b: string; maxAlpha: number; glow: number }> = {
-  // Embers drifting up through the dark.
-  dark: { a: '255,106,61', b: '236,229,216', maxAlpha: 0.75, glow: 3.2 },
-  // Golden pollen in warm light.
-  light: { a: '232,81,42', b: '214,150,70', maxAlpha: 0.4, glow: 2.4 },
+interface Star {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  len: number
+  life: number
+  age: number
+  width: number
+  rgb: string
 }
+
+const COLORS: Record<Theme, { a: string; b: string; maxAlpha: number; glow: number; star: string[]; starAlpha: number }> = {
+  // Embers drifting up through the dark; stars are bone with an ember tint.
+  dark: { a: '255,106,61', b: '236,229,216', maxAlpha: 0.75, glow: 3.2, star: ['236,229,216', '255,170,130'], starAlpha: 0.9 },
+  // Golden pollen in warm light; stars are ember and gold.
+  light: { a: '232,81,42', b: '214,150,70', maxAlpha: 0.4, glow: 2.4, star: ['232,81,42', '214,150,70'], starAlpha: 0.55 },
+}
+
+/** Seconds until the next shooting star: a few seconds, with some variance. */
+const nextStarDelay = () => 2.5 + Math.random() * 5
 
 /**
  * Slow-drifting colour fields behind everything plus a field of rising
@@ -37,11 +52,65 @@ export default function Ambient() {
     const reduced = prefersReducedMotion()
     const palette = COLORS[theme]
     let motes: Mote[] = []
+    let stars: Star[] = []
+    let nextStar = 1.5 + Math.random() * 2
     let w = 0
     let h = 0
     let dpr = 1
     let raf = 0
     let last = performance.now()
+
+    // A streak from the upper area, heading down-right or down-left at a
+    // shallow angle, fast enough to read as a meteor rather than a comet.
+    const spawnStar = (): Star => {
+      const dir = Math.random() < 0.6 ? 1 : -1
+      const angle = (18 + Math.random() * 14) * (Math.PI / 180)
+      const speed = 700 + Math.random() * 500
+      return {
+        x: dir === 1 ? Math.random() * w * 0.6 : w * 0.4 + Math.random() * w * 0.6,
+        y: Math.random() * h * 0.45,
+        vx: Math.cos(angle) * speed * dir,
+        vy: Math.sin(angle) * speed,
+        len: 180 + Math.random() * 180,
+        life: 0.6 + Math.random() * 0.5,
+        age: 0,
+        width: 1.4 + Math.random() * 1.1,
+        rgb: palette.star[Math.random() < 0.7 ? 0 : 1],
+      }
+    }
+
+    const drawStar = (s: Star) => {
+      // Bright for most of its life, then a quick fade.
+      const k = s.age / s.life
+      const a = palette.starAlpha * (k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3)
+      const mag = Math.hypot(s.vx, s.vy)
+      const tx = s.x - (s.vx / mag) * s.len
+      const ty = s.y - (s.vy / mag) * s.len
+      const g = ctx.createLinearGradient(s.x, s.y, tx, ty)
+      g.addColorStop(0, `rgba(${s.rgb},${a})`)
+      g.addColorStop(0.25, `rgba(${s.rgb},${a * 0.45})`)
+      g.addColorStop(1, `rgba(${s.rgb},0)`)
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.moveTo(s.x, s.y)
+      ctx.lineTo(tx, ty)
+      // Soft wide under-glow, then the crisp core.
+      ctx.globalAlpha = 0.3
+      ctx.strokeStyle = g
+      ctx.lineWidth = s.width * 3.5
+      ctx.stroke()
+      ctx.globalAlpha = 1
+      ctx.lineWidth = s.width
+      ctx.stroke()
+      // Head glow
+      const hg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.width * 4)
+      hg.addColorStop(0, `rgba(${s.rgb},${a})`)
+      hg.addColorStop(1, `rgba(${s.rgb},0)`)
+      ctx.fillStyle = hg
+      ctx.beginPath()
+      ctx.arc(s.x, s.y, s.width * 4, 0, Math.PI * 2)
+      ctx.fill()
+    }
 
     const spawn = (fromBottom: boolean): Mote => ({
       x: Math.random() * w,
@@ -88,7 +157,22 @@ export default function Ambient() {
         ctx.arc(x, m.y, m.r * palette.glow, 0, Math.PI * 2)
         ctx.fill()
       }
-      if (!reduced) raf = requestAnimationFrame(draw)
+
+      if (!reduced) {
+        nextStar -= dt
+        if (nextStar <= 0) {
+          stars.push(spawnStar())
+          nextStar = nextStarDelay()
+        }
+        for (const s of stars) {
+          s.age += dt
+          s.x += s.vx * dt
+          s.y += s.vy * dt
+          drawStar(s)
+        }
+        stars = stars.filter((s) => s.age < s.life && s.y < h + s.len && s.x > -s.len && s.x < w + s.len)
+        raf = requestAnimationFrame(draw)
+      }
     }
 
     const start = () => {

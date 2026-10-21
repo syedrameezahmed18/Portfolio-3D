@@ -4,6 +4,11 @@ import { useGSAP } from '@gsap/react'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
+// The preloader always starts at the top. Without this, a reload restores
+// the old scroll position after the curtain lifts, and ScrollTrigger's own
+// scroll memory can hand Lenis a stale target.
+ScrollTrigger.clearScrollMemory('manual')
+
 export { gsap, ScrollTrigger, useGSAP }
 
 export const prefersReducedMotion = (): boolean =>

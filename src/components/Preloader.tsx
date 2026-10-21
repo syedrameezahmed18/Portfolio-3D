@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { finishIntro, gsap, prefersReducedMotion, useGSAP } from '@/lib/motion'
-import { lockScroll } from '@/lib/smooth-scroll'
+import { getLenis, lockScroll } from '@/lib/smooth-scroll'
 
 const WORDS = ['designing', 'engineering', 'shipping']
 const RING_R = 94
@@ -25,6 +25,10 @@ export default function Preloader() {
   useGSAP(
     () => {
       const done = () => {
+        // Pin both the window and Lenis's own target to the top before the
+        // lock lifts, so nothing restored during the preloader can carry over.
+        window.scrollTo(0, 0)
+        getLenis()?.scrollTo(0, { immediate: true, force: true })
         lockScroll(false)
         finishIntro()
         setGone(true)
