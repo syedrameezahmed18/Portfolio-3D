@@ -65,5 +65,41 @@ export const useTheme = (): Theme => useSyncExternalStore(subscribe, read, () =>
 /** Palette the WebGL scenes need; CSS handles everything else via tokens. */
 export const scenePalette = (theme: Theme) =>
   theme === 'light'
-    ? { bg: '#f4efe7', ink: '#15120f', ember: '#e8512a', line: '#15120f', dust: '#15120f', shard: '#f7f2ea' }
-    : { bg: '#0b0a09', ink: '#ece5d8', ember: '#ff6a3d', line: '#ece5d8', dust: '#ece5d8', shard: '#17140f' }
+    ? {
+        bg: '#f4efe7',
+        ink: '#15120f',
+        ember: '#e8512a',
+        // Light mode reads as paper and warm light: white facets, ember
+        // linework and motes, a peach sun with a soft (non-additive) halo.
+        line: '#15120f',
+        lineOpacity: 0.1,
+        dust: '#e8512a',
+        dustOpacity: 0.16,
+        shard: '#fbf7f0',
+        shardFlat: true,
+        knot: '#e8512a',
+        knotOpacity: 0.11,
+        orb: '#ffb48c',
+        orbEmissive: 0.55,
+        glowAdditive: false,
+        glowOpacity: 0.55,
+        ambient: 1.4,
+      }
+    : {
+        bg: '#0b0a09',
+        ink: '#ece5d8',
+        ember: '#ff6a3d',
+        line: '#ece5d8',
+        lineOpacity: 0.16,
+        dust: '#ece5d8',
+        dustOpacity: 0.5,
+        shard: '#17140f',
+        shardFlat: false,
+        knot: '#ece5d8',
+        knotOpacity: 0.09,
+        orb: '#2a1309',
+        orbEmissive: 1.1,
+        glowAdditive: true,
+        glowOpacity: 0.4,
+        ambient: 0.35,
+      }

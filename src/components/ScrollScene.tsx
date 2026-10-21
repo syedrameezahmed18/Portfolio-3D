@@ -131,11 +131,11 @@ function Halo({ layout, simple, p }: ObjProps) {
       </mesh>
       <mesh rotation={[0.4, 0.2, 0]}>
         <torusGeometry args={[r * 1.18, 0.006, 8, 160]} />
-        <meshBasicMaterial color={p.line} transparent opacity={0.16} />
+        <meshBasicMaterial color={p.line} transparent opacity={p.lineOpacity} />
       </mesh>
       <mesh rotation={[-0.3, 0.5, 0]}>
         <torusGeometry args={[r * 0.7, 0.004, 8, 120]} />
-        <meshBasicMaterial color={p.line} transparent opacity={0.1} />
+        <meshBasicMaterial color={p.line} transparent opacity={p.lineOpacity * 0.6} />
       </mesh>
     </group>
   )
@@ -169,11 +169,16 @@ function Shards({ layout, count, simple, p }: ObjProps & { count: number }) {
         <Float key={i} speed={it.speed} rotationIntensity={1.2} floatIntensity={1.4}>
           <mesh position={it.pos} scale={it.scale}>
             <icosahedronGeometry args={[1, 0]} />
-            <meshPhysicalMaterial color={p.shard} roughness={0.18} metalness={0.3} clearcoat={1} clearcoatRoughness={0.15} />
+            {p.shardFlat ? (
+              // Paper facets: matte, flat-shaded, lit by the warm key light.
+              <meshStandardMaterial color={p.shard} roughness={0.9} metalness={0} flatShading />
+            ) : (
+              <meshPhysicalMaterial color={p.shard} roughness={0.18} metalness={0.3} clearcoat={1} clearcoatRoughness={0.15} />
+            )}
           </mesh>
           <mesh position={it.pos} scale={it.scale * 1.01}>
             <icosahedronGeometry args={[1, 0]} />
-            <meshBasicMaterial color={p.line} wireframe transparent opacity={0.14} />
+            <meshBasicMaterial color={p.shardFlat ? p.ember : p.line} wireframe transparent opacity={p.shardFlat ? 0.35 : 0.14} />
           </mesh>
         </Float>
       ))}
@@ -195,8 +200,9 @@ function Knot({ layout, simple, p }: ObjProps) {
       position={simple ? place(layout, 'stack', 0.92, -0.02, -2.5) : place(layout, 'stack', 0.8, 0.1, -2.5)}
       scale={minSide(layout) * (simple ? 0.19 : 0.22)}
     >
-      <torusKnotGeometry args={[1, 0.3, 180, 20, 2, 5]} />
-      <meshBasicMaterial color={p.line} wireframe transparent opacity={0.09} />
+      {/* Coarse tessellation on purpose: an open lattice, not a dense mesh. */}
+      <torusKnotGeometry args={[1, 0.3, 110, 10, 2, 5]} />
+      <meshBasicMaterial color={p.knot} wireframe transparent opacity={p.knotOpacity} />
     </mesh>
   )
 }
@@ -218,15 +224,21 @@ function Orb({ layout, simple, p }: ObjProps) {
   return (
     <group ref={group} position={[x, y, z]} userData={{ x }}>
       <sprite scale={[r * 7, r * 7, 1]}>
-        <spriteMaterial map={glow} blending={THREE.AdditiveBlending} transparent opacity={0.4} depthWrite={false} />
+        <spriteMaterial
+          map={glow}
+          blending={p.glowAdditive ? THREE.AdditiveBlending : THREE.NormalBlending}
+          transparent
+          opacity={p.glowOpacity}
+          depthWrite={false}
+        />
       </sprite>
       <mesh>
         <sphereGeometry args={[r, 64, 64]} />
-        <meshStandardMaterial color="#2a1309" emissive={p.ember} emissiveIntensity={1.1} roughness={0.9} />
+        <meshStandardMaterial color={p.orb} emissive={p.ember} emissiveIntensity={p.orbEmissive} roughness={0.9} />
       </mesh>
       <mesh rotation={[1.2, 0, 0]}>
         <torusGeometry args={[r * 1.35, 0.006, 8, 160]} />
-        <meshBasicMaterial color={p.line} transparent opacity={0.18} />
+        <meshBasicMaterial color={p.line} transparent opacity={p.lineOpacity + 0.04} />
       </mesh>
       <pointLight intensity={30} color={p.ember} distance={14} decay={2} />
     </group>
@@ -234,7 +246,7 @@ function Orb({ layout, simple, p }: ObjProps) {
 }
 
 /** Dust spread over the whole document so the void never reads as flat. */
-function Dust({ layout, count, color }: { layout: Layout; count: number; color: string }) {
+function Dust({ layout, count, color, opacity }: { layout: Layout; count: number; color: string; opacity: number }) {
   const ref = useRef<THREE.Points>(null)
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
@@ -255,7 +267,7 @@ function Dust({ layout, count, color }: { layout: Layout; count: number; color: 
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.022} color={color} transparent opacity={0.5} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.022} color={color} transparent opacity={opacity} sizeAttenuation depthWrite={false} />
     </points>
   )
 }
@@ -271,13 +283,14 @@ function Scene({ simple: lightweight }: { simple: boolean }) {
   return (
     <>
       <Rig layout={layout} />
-      <ambientLight intensity={theme === 'light' ? 0.7 : 0.35} />
-      <directionalLight position={[4, 6, 5]} intensity={1.6} color="#fff1e4" />
+      <ambientLight intensity={p.ambient} />
+      <directionalLight position={[4, 6, 5]} intensity={theme === 'light' ? 2.2 : 1.6} color="#fff1e4" />
+      {theme === 'light' && <hemisphereLight args={['#fff8ef', '#f0b79a', 0.9]} />}
       <Halo layout={layout} simple={simple} p={p} />
       <Shards layout={layout} count={simple ? 5 : 8} simple={simple} p={p} />
       <Knot layout={layout} simple={simple} p={p} />
       <Orb layout={layout} simple={simple} p={p} />
-      <Dust layout={layout} count={simple ? 220 : 420} color={p.dust} />
+      <Dust layout={layout} count={(simple ? 220 : 420) * (theme === 'light' ? 0.5 : 1)} color={p.dust} opacity={p.dustOpacity} />
     </>
   )
 }

@@ -37,6 +37,11 @@
 :root[data-theme="dark"] .blend-dark {
   mix-blend-mode: difference;
 }
+/* Light mode cannot blend, so the nav gets a soft paper fade to sit on. */
+:root[data-theme="light"] header.blend-dark {
+  background: linear-gradient(to bottom, var(--color-ink) 0%, rgb(244 239 231 / 0.85) 55%, transparent 100%);
+  padding-bottom: 1.75rem;
+}
 
 /* Theme switch: the new theme wipes in as a circle (see toggleTheme). */
 ::view-transition-old(root),
